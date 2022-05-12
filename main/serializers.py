@@ -3,6 +3,14 @@ from rest_framework import serializers
 from . models  import Projects, Tasks, Comments
 
 
+class TaskSerializer(serializers.ModelSerializer):
+    """Задачи"""
+
+    class Meta:
+        model = Tasks
+        fields = '__all__'
+
+
 class CommentCreateSerializer(serializers.ModelSerializer):
     """Комментарий"""
 
@@ -14,7 +22,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class TaskSerializer(serializers.ModelSerializer):
+class TaskProjectSerializer(serializers.ModelSerializer):
     """Задачи"""
 
     project = serializers.SlugRelatedField(slug_field='title', queryset=Projects.objects.all())
@@ -24,11 +32,21 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ProjectCreateSerializer(serializers.ModelSerializer):
+
+    supervisor = serializers.SlugRelatedField(slug_field='username', queryset=User.objects.all())
+    developers = serializers.SlugRelatedField(slug_field='username', many=True, queryset=User.objects.all())
+
+    class Meta:
+        model = Projects
+        fields = "__all__"
+
+
 class ProjectsSerializer(serializers.ModelSerializer):
     """Все проекты"""
     start = serializers.DateField()
     end = serializers.DateField()
-    task = TaskSerializer(many=True, read_only=True)
+    task = TaskProjectSerializer(many=True, read_only=True)
     comments = CommentCreateSerializer(many=True, read_only=True)
     supervisor = serializers.SlugRelatedField(slug_field='username', queryset=User.objects.all())
     developers = serializers.SlugRelatedField(slug_field='username', many=True, queryset=User.objects.all())
@@ -39,3 +57,5 @@ class ProjectsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Projects
         fields = "__all__"
+
+
